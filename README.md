@@ -1,6 +1,6 @@
 # Interface Parser
 
-![logo](Resources/revenant_logo_wolf.png)
+![logo](Resources/revenant_logo.png)
 
 ## Описание
 
