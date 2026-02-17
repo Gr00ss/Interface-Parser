@@ -348,6 +348,7 @@ int main() {
         config.Timer = TimerOnWin();
         preciseSleep(1000);
 
+        
         getMouseClickPosition(config.inputPos, L"Наведите на позицию строки ввода ID");
         getMouseClickPosition(config.colorCheckPos, L"Наведите на пустую область рядом с вашим ником (справа)");
         getMouseClickPosition(config.colorCheckPosMenu, L"Наведите на 'Не знание правил - не освобождает от ответственности'");
