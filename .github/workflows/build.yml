@@ -15,20 +15,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up MinGW
-      uses: egor-tensin/setup-mingw@v2
+    - name: Set up MSYS2
+      uses: msys2/setup-msys2@v2
       with:
-        platform: x64
-        version: latest
+        msystem: UCRT64
+        install: mingw-w64-ucrt64-gcc mingw-w64-ucrt64-g++ mingw-w64-ucrt64-make
     
     - name: Create build directory
       run: mkdir build
+      shell: powershell
     
     - name: Build main.cpp
       run: |
         cd build
         g++ -fdiagnostics-color=always -g ..\main.cpp -o main.exe
-      shell: powershell
+      shell: msys2 {0}
     
     - name: Check if executable was created
       run: |
