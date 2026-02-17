@@ -15,25 +15,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up MSYS2
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: UCRT64
-        update: true
-        install: >-
-          base-devel
-          gcc
-          g++
+    - name: Set up MinGW with Choco
+      run: |
+        choco install mingw -y
+        refreshenv
+      shell: powershell
     
     - name: Create build directory
-      shell: msys2 {0}
-      run: mkdir -p build
+      run: mkdir build
+      shell: powershell
     
     - name: Build main.cpp
-      shell: msys2 {0}
       run: |
         cd build
-        g++ -fdiagnostics-color=always -g ../main.cpp -o main.exe
+        g++ -fdiagnostics-color=always -g ..\main.cpp -o main.exe
+      shell: powershell
     
     - name: Check if executable was created
       run: |
