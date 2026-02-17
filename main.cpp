@@ -71,7 +71,16 @@ string colorToHex(COLORREF color) {
 
 COLORREF getPixelColor(POINT pos) {
     HDC hdc = GetDC(NULL);
-    COLORREF color = GetPixel(hdc, pos.x, pos.y);
+    COLORREF color = 0;
+    HMODULE gdi = LoadLibraryW(L"gdi32.dll");
+    if (gdi) {
+        typedef COLORREF(WINAPI *GetPixel_t)(HDC, int, int);
+        GetPixel_t pGetPixel = (GetPixel_t)GetProcAddress(gdi, "GetPixel");
+        if (pGetPixel) {
+            color = pGetPixel(hdc, pos.x, pos.y);
+        }
+        FreeLibrary(gdi);
+    }
     ReleaseDC(NULL, hdc);
     return color;
 }
@@ -195,19 +204,19 @@ void copyClipboardToFile(const std::wstring& filename) {
     outFile.close();
 }
 
-bool isProcessRunning(const string &processName) {
+bool isProcessRunning(const std::wstring &processName) {
     HANDLE hProcessSnap;
-    PROCESSENTRY32 pe32;
+    PROCESSENTRY32W pe32;
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) return false;
-    pe32.dwSize = sizeof(PROCESSENTRY32);
-    if (Process32First(hProcessSnap, &pe32)) {
+    pe32.dwSize = sizeof(PROCESSENTRY32W);
+    if (Process32FirstW(hProcessSnap, &pe32)) {
         do {
-            if (string(pe32.szExeFile) == processName) {
+            if (std::wstring(pe32.szExeFile) == processName) {
                 CloseHandle(hProcessSnap);
                 return true;
             }
-        } while (Process32Next(hProcessSnap, &pe32));
+        } while (Process32NextW(hProcessSnap, &pe32));
     }
     CloseHandle(hProcessSnap);
     return false;
@@ -292,9 +301,26 @@ int TimerOnWin() {
     }
 }
 
+void ensureDpiAwareness() {
+    HMODULE shcore = LoadLibraryW(L"Shcore.dll");
+    if (shcore) {
+        typedef HRESULT(WINAPI *SetProcessDpiAwareness_t)(int);
+        SetProcessDpiAwareness_t pSet = (SetProcessDpiAwareness_t)GetProcAddress(shcore, "SetProcessDpiAwareness");
+        if (pSet) {
+            pSet(PROCESS_PER_MONITOR_DPI_AWARE);
+        }
+        FreeLibrary(shcore);
+    } else {
+        HMODULE user = GetModuleHandleW(L"user32.dll");
+        if (user) {
+            typedef BOOL(WINAPI *SetProcessDPIAware_t)(void);
+            SetProcessDPIAware_t pSetOld = (SetProcessDPIAware_t)GetProcAddress(user, "SetProcessDPIAware");
+            if (pSetOld) pSetOld();
+        }
+    }
+}
+
 int main() {
-    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-    SetProcessDPIAware();
     _setmode(_fileno(stdout), _O_U16TEXT);
     
     wcout << L"\n ██▀███  ▓█████ ██▒   █▓▓█████  ███▄    █  ▄▄▄       ███▄    █ ▄▄▄█████▓" << endl;
@@ -309,8 +335,8 @@ int main() {
     wcout << L"                    ░                                                    " << endl;
 
     signal(SIGINT, signalHandler);
-    if (!isProcessRunning("GTA5.exe")) {
-        wcout << L"Процесс GTA5.exe не запущен. Завершение работы." << endl;
+    if (!isProcessRunning(L"GTA5.exe") && !isProcessRunning(L"GTA5_Enhanced.exe")) {
+        wcout << L"Процесс GTA5.exe или GTA5_Enhanced.exe не запущен. Завершение работы." << endl;
         wcin.get();
         return 1;
     }
@@ -393,3 +419,5 @@ int main() {
 
     } while (true);
 }
+
+void ensureDpiAwareness();

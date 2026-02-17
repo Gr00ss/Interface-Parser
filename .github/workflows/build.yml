@@ -1,0 +1,68 @@
+name: Build C++ Application
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up MinGW
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        platform: x64
+        version: latest
+    
+    - name: Create build directory
+      run: mkdir build
+    
+    - name: Build main.cpp
+      run: |
+        cd build
+        g++ -fdiagnostics-color=always -g ..\main.cpp -o main.exe
+      shell: powershell
+    
+    - name: Check if executable was created
+      run: |
+        if (Test-Path build/main.exe) {
+          Write-Host "Build successful! main.exe created."
+        } else {
+          Write-Host "Build failed!"
+          exit 1
+        }
+      shell: powershell
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: main-executable
+        path: build/main.exe
+        retention-days: 30
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    
+    - name: Upload Release Asset
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/main.exe
+        asset_name: main.exe
+        asset_content_type: application/octet-stream

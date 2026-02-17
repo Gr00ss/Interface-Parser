@@ -1,0 +1,67 @@
+# Build directories
+build/
+Debug/
+Release/
+.vs/
+.vscode/build/
+
+# Compiled object files
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.dylib
+
+# Executable files
+*.exe
+*.out
+*.app
+
+# Backup and temporary files
+*.bak
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sln
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.cbp
+*.layout
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Dependencies and packages
+node_modules/
+*.npm
+package-lock.json
+
+# Config and sensitive files
+config.txt
+ids.txt
+results.txt
+
+# Back folder (backup/old versions)
+back/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Windows specific
+*.lnk
+*.pdb
+*.ilk
