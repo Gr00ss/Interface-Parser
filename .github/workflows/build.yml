@@ -19,17 +19,21 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         msystem: UCRT64
-        install: mingw-w64-ucrt64-gcc mingw-w64-ucrt64-g++ mingw-w64-ucrt64-make
+        update: true
+        install: >-
+          base-devel
+          gcc
+          g++
     
     - name: Create build directory
-      run: mkdir build
-      shell: powershell
+      shell: msys2 {0}
+      run: mkdir -p build
     
     - name: Build main.cpp
+      shell: msys2 {0}
       run: |
         cd build
-        g++ -fdiagnostics-color=always -g ..\main.cpp -o main.exe
-      shell: msys2 {0}
+        g++ -fdiagnostics-color=always -g ../main.cpp -o main.exe
     
     - name: Check if executable was created
       run: |
