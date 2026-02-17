@@ -30,7 +30,7 @@ jobs:
     - name: Build main.cpp
       run: |
         cd build
-        g++ -fdiagnostics-color=always -g ..\main.cpp -o main.exe
+        g++ -fdiagnostics-color=always -g -static ..\main.cpp -o main.exe
       shell: powershell
     
     - name: Check if executable was created
